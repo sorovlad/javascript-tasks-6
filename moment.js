@@ -7,12 +7,11 @@ module.exports = function () {
     return {
         _date: null,
         timezone: null,
-
         get date() {
             if (this._date === null) {
                 return null;
             }
-            return this.timeSet(this._date);
+            return this.getMinutes(this._date);
         },
         get fullDate() {
             return this._date;
@@ -31,10 +30,9 @@ module.exports = function () {
             if (this._date !== null) {
                 var dateInTimezone = changeToFormatZone(this);
 
-                pattern = pattern.replace('%DD', dateInTimezone.date);
-                pattern = pattern.replace('%HH', dateInTimezone.hour);
-                pattern = pattern.replace('%MM', dateInTimezone.minute);
-
+                pattern = pattern.replace('%DD', dateInTimezone.date)
+                    .replace('%HH', dateInTimezone.hour)
+                    .replace('%MM', dateInTimezone.minute);
                 return pattern;
             }
         },
@@ -44,21 +42,22 @@ module.exports = function () {
         fromMoment: function (moment) {
             if (this._date !== null) {
                 var result = substraction(this.fullDate, moment.fullDate);
-                return '«До ограбления остался ' + result.date +
-                ' день ' + result.hour + ' часов ' + result.minute + ' минут»';
+                return `«До ограбления остался ${result.date} ` +
+                    `день ${result.hour} часов ${result.minute} минут»`;
             }
         },
         parseTime: function (time) {
             var re = /(.{2})\s(\d{2}):(\d{2})([\+|\-]\d{1,2})/;
             var time = time.match(re);
 
-            var timezone = time[4].indexOf('+') === 0 ? Number(time[4].slice(1)) : Number(time[4]);
+            var timezone = Number(time[4]);
             var times = toCorrectTime(weekDays[time[1]], Number(time[2]) - timezone);
 
+            // console.log(timezone);
             return {date: times.date, hour: times.hour,
                 minute: Number(time[3]), timezone: timezone};
         },
-        timeSet: function (time) {
+        getMinutes: function (time) {
             return time.date * 24 * 60 + time.hour * 60 + time.minute;
         }
     };

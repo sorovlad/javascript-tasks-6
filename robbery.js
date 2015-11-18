@@ -10,48 +10,47 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
     var workTime = [];
     for (var item in robbers) {
         robbers[item].forEach(function (item, i, robbers) {
-            workTime.push({from: appropriateMoment.parseTime(item.from),
-                to: appropriateMoment.parseTime(item.to)});
+            var timeFrom = appropriateMoment.parseTime(item.from);
+            var timeTo = appropriateMoment.parseTime(item.to);
+            if (timeFrom <= timeTo) {
+                workTime.push({from: timeFrom, to: timeTo});
+            }
         });
     }
 
     workTime.sort(function (a, b) {
-        return appropriateMoment.timeSet(a.from) > appropriateMoment.timeSet(b.from) ? 1 : -1;
+        return appropriateMoment.getMinutes(a.from) >
+            appropriateMoment.getMinutes(b.from) ? 1 : -1;
     });
-    minDuration = minDuration;
 
     var workingTimeFrom = appropriateMoment.parseTime('ПН ' + workingHours.from);
     var workingTimeTo = appropriateMoment.parseTime('ПН ' + workingHours.to);
 
-    workingTimeFrom.date--;
-    workingTimeTo.date--;
-
     var i = 0;
-    for (var weekDay = 0; weekDay < 6; weekDay++) {
-        workingTimeFrom.date++;
-        workingTimeTo.date++;
-
+    for (var weekDay = 0; weekDay < 2; weekDay++) {
         var minTime = workingTimeFrom;
 
         for (; i < workTime.length; i++) {
-            if (appropriateMoment.timeSet(workTime[i].to) >
-                    appropriateMoment.timeSet(workingTimeTo)) {
+            if (appropriateMoment.getMinutes(workTime[i].to) >
+                    appropriateMoment.getMinutes(workingTimeTo)) {
                 break;
             }
-            if (appropriateMoment.timeSet(workTime[i].from) -
-                    appropriateMoment.timeSet(minTime) > minDuration) {
+            if (appropriateMoment.getMinutes(workTime[i].from) -
+                    appropriateMoment.getMinutes(minTime) > minDuration) {
                 appropriateMoment.date = minTime;
                 appropriateMoment.timezone = minTime.timezone;
                 break;
             } else {
-                minTime = appropriateMoment.timeSet(minTime) >
-                    appropriateMoment.timeSet(workTime[i].to) ?
+                minTime = appropriateMoment.getMinutes(minTime) >
+                    appropriateMoment.getMinutes(workTime[i].to) ?
                     minTime : workTime[i].to;
             }
         }
         if (appropriateMoment.date !== null) {
             break;
         }
+        workingTimeFrom.date++;
+        workingTimeTo.date++;
     }
 
     return appropriateMoment;
