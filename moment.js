@@ -11,7 +11,7 @@ module.exports = function () {
             if (this._date === null) {
                 return null;
             }
-            return this.getMinutes(this._date);
+            return this.getMinutes(this._date) + 60 * this.timezone;
         },
         get fullDate() {
             return this._date;
